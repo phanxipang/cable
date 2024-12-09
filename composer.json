@@ -1,6 +1,6 @@
 {
     "name": "fansipan/cable",
-    "description": "This is my package cable",
+    "description": "Runner for handling data import or export",
     "keywords": [
         "fansipan",
         "cable"

@@ -46,12 +46,12 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 [ico-version]: https://img.shields.io/packagist/v/fansipan/cable.svg?style=for-the-badge
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge
-[ico-gh-actions]: https://img.shields.io/github/actions/workflow/status/fansipan/cable/testing.yml?branch=main&label=actions&logo=github&style=for-the-badge
-[ico-codecov]: https://img.shields.io/codecov/c/github/fansipan/cable?logo=codecov&style=for-the-badge
-[ico-downloads]: https://img.shields.io/packagist/dt/fansipan/cable.svg?style=for-the-badge
+[ico-gh-actions]: https://img.shields.io/github/actions/workflow/status/phanxipang/cable/testing.yml?branch=main&label=actions&logo=github&style=for-the-badge
+[ico-codecov]: https://img.shields.io/codecov/c/github/phanxipang/cable?logo=codecov&style=for-the-badge
+[ico-downloads]: https://img.shields.io/packagist/dt/phanxipang/cable.svg?style=for-the-badge
 
 [link-packagist]: https://packagist.org/packages/fansipan/cable
-[link-gh-actions]: https://github.com/jenky/fansipan/cable
-[link-codecov]: https://codecov.io/gh/fansipan/cable
+[link-gh-actions]: https://github.com/jenky/phanxipang/cable
+[link-codecov]: https://codecov.io/gh/phanxipang/cable
 [link-downloads]: https://packagist.org/packages/fansipan/cable
 
