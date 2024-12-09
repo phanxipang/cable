@@ -1,0 +1,73 @@
+{
+    "name": "fansipan/cable",
+    "description": "This is my package cable",
+    "keywords": [
+        "fansipan",
+        "cable"
+    ],
+    "homepage": "https://github.com/fansipan/cable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lynh",
+            "email": "author@domain.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "amphp/pipeline": "^1.2",
+        "cuyz/valinor": "^1.14",
+        "league/flysystem": "^3.0",
+        "league/flysystem-memory": "^3.0",
+        "psr/event-dispatcher": "^1.0",
+        "scriptfusion/porter": "^7.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.10",
+        "monolog/monolog": "^3.0",
+        "php-di/php-di": "^7.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^10.0",
+        "symfony/var-dumper": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fansipan\\Cable\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Fansipan\\Cable\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": [
+            "vendor/bin/phpstan analyse"
+        ],
+        "cs": [
+            "vendor/bin/php-cs-fixer fix"
+        ],
+        "test": [
+            "vendor/bin/phpunit"
+        ],
+        "coverage": [
+            "vendor/bin/phpunit --coverage"
+        ],
+        "check": [
+            "@cs --dry-run",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
