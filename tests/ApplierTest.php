@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Fansipan\Cable\Tests;
 
 use Fansipan\Cable\Acknowledger;
+use Fansipan\Cable\Applier;
 use Fansipan\Cable\Planner;
-use Fansipan\Cable\State\State;
 use League\Flysystem\Filesystem;
 use League\Flysystem\InMemory\InMemoryFilesystemAdapter;
 use ScriptFUSION\Porter\Porter;
 
-final class PlanImporterTest extends TestCase
+final class ApplierTest extends TestCase
 {
-    public function test_planner(): void
+    public function test_applier(): void
     {
         $porter = new Porter($this->createContainer());
         $importer = JsonData::createFromFile(__DIR__.'/fixtures/posts.json');
@@ -21,6 +21,9 @@ final class PlanImporterTest extends TestCase
 
         $planner->handle($porter->import($planner->source()), new Acknowledger());
 
-        $this->assertTrue($storage->has(State::STATE_FILE));
+        $applier = new Applier($importer, $storage);
+        $applier->handle($porter->import($applier->source()), new Acknowledger());
+
+        $this->assertCount(100, $importer->storage());
     }
 }

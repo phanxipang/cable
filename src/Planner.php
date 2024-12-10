@@ -23,6 +23,7 @@ final class Planner extends AbstractRunner
         $output = $this->outputFilename();
 
         if ($this->storage->fileExists($output)) {
+            $this->logger->notice('State file exists. Creating back up file.');
             $this->storage->copy($output, $output.sprintf('.%d.backup', \time()));
         }
 

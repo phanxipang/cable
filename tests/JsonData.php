@@ -7,6 +7,7 @@ namespace Fansipan\Cable\Tests;
 use Fansipan\Cable\Acknowledger;
 use Fansipan\Cable\ConcurrentHandler;
 use Fansipan\Cable\Runner;
+use ScriptFUSION\Porter\Collection\CountableProviderRecords;
 use ScriptFUSION\Porter\Import\Import;
 use ScriptFUSION\Porter\Provider\Resource\StaticResource;
 
@@ -20,9 +21,10 @@ final class JsonData extends StaticResource implements Runner
         string|array $data,
     ) {
         $this->storage = new InMemoryData();
-        $gen = static fn () => yield from \is_array($data) ? $data : \json_decode($data, true, \JSON_THROW_ON_ERROR);
+        $data = \is_array($data) ? $data : \json_decode($data, true, \JSON_THROW_ON_ERROR);
+        $gen = static fn () => yield from $data;
 
-        parent::__construct($gen());
+        parent::__construct(new CountableProviderRecords($gen(), \count($data), $this));
     }
 
     public function source(): Import
@@ -33,7 +35,7 @@ final class JsonData extends StaticResource implements Runner
     private function process(mixed $data, Acknowledger $ack): void
     {
         $this->storage->add($data);
-        $ack->ack();
+        $ack->ack($data);
     }
 
     public function storage(): InMemoryData
