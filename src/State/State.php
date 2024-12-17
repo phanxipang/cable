@@ -8,12 +8,9 @@ final class State
 {
     public const STATE_FILE = 'cable.state';
 
-    /**
-     * @param iterable<array-key, mixed> $data
-     */
     public function __construct(
-        public readonly \DateTimeInterface $time,
-        public readonly iterable $data,
+        public \DateTimeInterface $time,
+        public ResourceCollection $resources,
     ) {
     }
 }

@@ -17,13 +17,17 @@
     "require": {
         "php": "^8.1",
         "amphp/pipeline": "^1.2",
+        "consolidation/log": "^3.1",
         "cuyz/valinor": "^1.14",
         "league/flysystem": "^3.0",
         "league/flysystem-memory": "^3.0",
         "psr/event-dispatcher": "^1.0",
+        "ramsey/collection": "^2.0",
+        "ramsey/uuid": "^4.7",
         "scriptfusion/porter": "^7.0"
     },
     "require-dev": {
+        "defuse/php-encryption": "^2.4",
         "friendsofphp/php-cs-fixer": "^3.10",
         "monolog/monolog": "^3.0",
         "php-di/php-di": "^7.0",

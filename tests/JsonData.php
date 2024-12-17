@@ -35,6 +35,7 @@ final class JsonData extends StaticResource implements Runner
     private function process(mixed $data, Acknowledger $ack): void
     {
         $this->storage->add($data);
+        // \usleep(3000);
         $ack->ack($data);
     }
 

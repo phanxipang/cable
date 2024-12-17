@@ -6,7 +6,8 @@ namespace Fansipan\Cable;
 
 use Fansipan\Cable\Event\PlanCreated;
 use Fansipan\Cable\State\Envelope;
-use Fansipan\Cable\State\State;
+use Fansipan\Cable\State\Resource;
+use Ramsey\Uuid\Rfc4122\UuidV7;
 use ScriptFUSION\Porter\Collection\RecordCollection;
 use ScriptFUSION\Porter\Import\Import;
 
@@ -20,22 +21,32 @@ final class Planner extends AbstractRunner
     public function handle(RecordCollection $data, Acknowledger $ack): void
     // public function handle(RecordCollection $data): void
     {
-        $output = $this->outputFilename();
-
-        if ($this->storage->fileExists($output)) {
-            $this->logger->notice('State file exists. Creating back up file.');
-            $this->storage->copy($output, $output.sprintf('.%d.backup', \time()));
-        }
+        $state = $this->readState();
 
         $this->logger->info('Writing state file');
 
-        $state = new State(new \DateTimeImmutable(), $data);
-        $envelope = new Envelope($state);
+        $out = 'out';
 
-        $this->storage->write($output, $this->serializer->encode($envelope));
+        $this->storage->write($out, $this->serializer->encode($data));
+
+        $state->time = new \DateTimeImmutable();
+        $resource = new Resource(
+            UuidV7::fromDateTime($state->time),
+            $out,
+            'json',
+            $this->storage->checksum($out),
+        );
+
+        if (! $state->resources->has($resource)) {
+            $state->resources->add($resource);
+        }
+
+        // $envelope = new Envelope($state);
+
+        $this->writeState($state);
 
         $this->event?->dispatch(new PlanCreated($state));
 
-        $this->logger->info('Plan has been created successfully', compact('envelope'));
+        $this->logger->info('Plan has been created successfully', compact('state'));
     }
 }
