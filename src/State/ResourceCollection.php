@@ -18,12 +18,7 @@ final class ResourceCollection extends AbstractCollection
 
     public function has(Resource $resource): bool
     {
-        return $this->filter(fn (Resource $item) => $this->equals($item->checksum, $resource->checksum))
+        return $this->filter(fn (Resource $item) => $item->checksum === $resource->checksum)
             ->count() > 0;
-    }
-
-    private function equals(string|\Stringable $a, string|\Stringable $b): bool
-    {
-        return (string) $a === (string) $b;
     }
 }

@@ -36,11 +36,11 @@ final class Applier extends AbstractRunner implements ProviderResource
             return $this->runner->source();
         }
 
-        $resource = $this->getResource();
-
-        // if (! $resource) {
-        //     throw new \InvalidArgumentException('State doesn\'t contain any resources.');
-        // }
+        try {
+            $resource = $this->getResource();
+        } catch (NoSuchElementException $e) {
+            throw new \InvalidArgumentException('State doesn\'t contain any resources.', previous: $e);
+        }
 
         $source = $resource->source;
 
@@ -96,6 +96,8 @@ final class Applier extends AbstractRunner implements ProviderResource
             $this->storage->delete($resource->source);
             $this->writeState($state);
         } catch (NoSuchElementException) {
+            $this->logger->warning('Unable to remove resource entry. Clean up operation is not completed.');
+
             return;
         }
     }
