@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Fansipan\Cable;
 
 use Fansipan\Cable\Event\PlanApplied;
-use Fansipan\Cable\Exception\ChecksumVerifyFailedException;
-use Fansipan\Cable\Exception\ResourceSourceNotFoundException;
-use Fansipan\Cable\State\Resource;
+use Fansipan\Cable\Exception\InvalidPlanException;
+use Fansipan\Cable\Exception\PlanChecksumVerifyFailedException;
+use Fansipan\Cable\Exception\PlanSourceNotFoundException;
+use Fansipan\Cable\State\Plan;
 use Fansipan\Cable\State\State;
 use Ramsey\Collection\Exception\NoSuchElementException;
+use Ramsey\Uuid\Rfc4122\UuidV7;
+use Ramsey\Uuid\UuidInterface;
 use ScriptFUSION\Porter\Collection\PorterRecords;
 use ScriptFUSION\Porter\Collection\RecordCollection;
 use ScriptFUSION\Porter\Connector\ImportConnector;
@@ -19,7 +22,16 @@ use ScriptFUSION\Porter\Provider\StaticDataProvider;
 
 final class Applier extends AbstractRunner implements ProviderResource
 {
-    private Resource $resource;
+    private ?UuidInterface $id = null;
+
+    private Plan $plan;
+
+    public function plan(string|UuidInterface $id): self
+    {
+        $this->id = $id instanceof UuidInterface ? $id : UuidV7::fromString($id);
+
+        return $this;
+    }
 
     public function getProviderClassName(): string
     {
@@ -28,28 +40,20 @@ final class Applier extends AbstractRunner implements ProviderResource
 
     public function fetch(ImportConnector $connector): \Iterator
     {
-        $output = State::STATE_FILE;
-
-        if (! $this->storage->fileExists($output)) {
-            $this->logger->warning(sprintf('State file not found. Using the original source from %s.', \get_debug_type($this->runner)));
-
-            return $this->runner->source();
-        }
-
         try {
-            $resource = $this->getResource();
+            $plan = $this->getPlan();
         } catch (NoSuchElementException $e) {
-            throw new \InvalidArgumentException('State doesn\'t contain any resources.', previous: $e);
+            throw $this->id ? InvalidPlanException::notFound($this->id, $e) : InvalidPlanException::empty($e);
         }
 
-        $source = $resource->source;
+        $source = $plan->source;
 
         if (! $this->storage->fileExists($source)) {
-            throw new ResourceSourceNotFoundException('Resource source not found.');
+            throw new PlanSourceNotFoundException($plan);
         }
 
-        if ($this->storage->checksum($source) !== $resource->checksum) {
-            throw new ChecksumVerifyFailedException($resource);
+        if ($this->storage->checksum($source) !== $plan->checksum) {
+            throw new PlanChecksumVerifyFailedException($plan);
         }
 
         yield from $this->serializer->decode($this->storage->read($source));
@@ -57,7 +61,13 @@ final class Applier extends AbstractRunner implements ProviderResource
 
     public function source(): Import
     {
-        return new Import($this);
+        if ($this->stateFileExists()) {
+            return new Import($this);
+        }
+
+        $this->logger->warning(sprintf('State file not found. Using the original source from %s.', \get_debug_type($this->runner)));
+
+        return $this->runner->source();
     }
 
     public function handle(RecordCollection $data, Acknowledger $ack): void
@@ -74,26 +84,33 @@ final class Applier extends AbstractRunner implements ProviderResource
         }
     }
 
-    private function getResource(): Resource
+    private function stateFileExists(): bool
     {
-        if (! isset($this->resource)) {
+        return $this->storage->fileExists(State::STATE_FILE);
+    }
+
+    private function getPlan(): Plan
+    {
+        if (! isset($this->plan)) {
             $state = $this->readState();
 
-            $this->resource = $state->resources->last();
+            $this->plan = $this->id
+                ? $state->plans->find($this->id)
+                : $state->plans->last();
         }
 
-        return $this->resource;
+        return $this->plan;
     }
 
     private function removeResource(): void
     {
         try {
-            $resource = $this->getResource();
+            $plan = $this->getPlan();
             $state = $this->readState();
 
             // @phpstan-ignore assign.propertyType
-            $state->resources = $state->resources->filter(static fn (Resource $item) => ! $item->id->equals($resource->id));
-            $this->storage->delete($resource->source);
+            $state->plans = $state->plans->filter(static fn (Plan $item) => ! $item->id->equals($plan->id));
+            $this->storage->delete($plan->source);
             $this->writeState($state);
         } catch (NoSuchElementException) {
             $this->logger->warning('Unable to remove resource entry. Clean up operation is not completed.');

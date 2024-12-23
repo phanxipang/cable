@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Fansipan\Cable\Exception;
 
-use Fansipan\Cable\State\Resource;
+use Fansipan\Cable\State\Plan;
 
-class ChecksumVerifyFailedException extends \LogicException
+class PlanSourceNotFoundException extends \RuntimeException
 {
     public function __construct(
-        public readonly Resource $resource,
-        string $message = 'Checksum is invalid',
+        public readonly Plan $resource,
+        string $message = 'Data source not found.',
         int $code = 0,
         ?\Throwable $previous = null,
     ) {

@@ -6,7 +6,7 @@ namespace Fansipan\Cable\State;
 
 use Ramsey\Uuid\UuidInterface;
 
-final class Resource
+final class Plan
 {
     /**
      * @param  array<array-key, mixed> $meta

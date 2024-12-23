@@ -10,7 +10,7 @@ final class State
 
     public function __construct(
         public \DateTimeInterface $time,
-        public ResourceCollection $resources,
+        public PlanCollection $plans,
     ) {
     }
 }

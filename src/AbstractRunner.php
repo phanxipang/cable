@@ -9,14 +9,18 @@ use CuyZ\Valinor\MapperBuilder;
 use CuyZ\Valinor\Normalizer\Format;
 use Fansipan\Cable\Serialization\JsonSerializer;
 use Fansipan\Cable\Serialization\Serializer;
-use Fansipan\Cable\State\ResourceCollection;
+use Fansipan\Cable\State\PlanCollection;
 use Fansipan\Cable\State\State;
 use League\Flysystem\FilesystemOperator;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * @internal
+ */
 abstract class AbstractRunner implements Runner
 {
     protected readonly LoggerInterface $logger;
@@ -32,11 +36,10 @@ abstract class AbstractRunner implements Runner
         protected readonly Runner $runner,
         protected readonly FilesystemOperator $storage,
         ?LoggerInterface $logger = null,
-        protected readonly ?EventDispatcherInterface $event = null,
         ?Serializer $serializer = null,
+        protected readonly ?EventDispatcherInterface $event = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
-
         $this->serializer = $serializer ?? new JsonSerializer();
     }
 
@@ -45,18 +48,18 @@ abstract class AbstractRunner implements Runner
      */
     public function withOptions(array $options): static
     {
+        $resolver = new OptionsResolver();
+        $this->configureOptions($resolver);
+
         $clone = clone $this;
-        $clone->options = $options;
+        $clone->options = $resolver->resolve($options);
 
         return $clone;
     }
 
-    public function withOption(string $key, mixed $value): static
+    protected function configureOptions(OptionsResolver $resolver): void
     {
-        $clone = clone $this;
-        $clone->options[$key] = $value;
-
-        return $clone;
+        //
     }
 
     protected function readState(): State
@@ -76,7 +79,7 @@ abstract class AbstractRunner implements Runner
 
             $state = $mapper->map(State::class, Source::json($this->storage->read($output)));
         } else {
-            $state = new State(new \DateTimeImmutable(), new ResourceCollection());
+            $state = new State(new \DateTimeImmutable(), new PlanCollection());
         }
 
         return $state;
