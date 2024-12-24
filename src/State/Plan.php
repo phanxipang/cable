@@ -14,7 +14,6 @@ final class Plan
     public function __construct(
         public readonly UuidInterface $id,
         public readonly string $source,
-        public readonly string $type,
         public readonly string $checksum,
         public readonly array $meta = [],
     ) {

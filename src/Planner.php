@@ -19,7 +19,7 @@ final class Planner extends AbstractRunner
         return $this->runner->source();
     }
 
-    public function output(string $filename): self
+    public function setOutput(string $filename): self
     {
         $this->output = $filename;
 
@@ -45,7 +45,6 @@ final class Planner extends AbstractRunner
         $plan = new Plan(
             UuidV7::fromDateTime($state->time),
             $out,
-            'json',
             $this->storage->checksum($out),
         );
 
@@ -55,7 +54,7 @@ final class Planner extends AbstractRunner
 
         $this->writeState($state);
 
-        $this->event?->dispatch(new PlanCreated($state));
+        $this->event?->dispatch(new PlanCreated($plan, $state));
 
         $this->logger->info('Plan has been created successfully', compact('state'));
     }

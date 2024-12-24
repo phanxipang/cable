@@ -62,11 +62,15 @@ abstract class AbstractRunner implements Runner
         //
     }
 
+    protected function hasState(): bool
+    {
+        return $this->storage->fileExists(State::STATE_FILE);
+    }
+
     protected function readState(): State
     {
-        $output = State::STATE_FILE;
-
-        if ($this->storage->fileExists($output)) {
+        if ($this->hasState()) {
+            $output = State::STATE_FILE;
             $this->logger->notice('State file exists. Creating back up file.');
             $this->storage->copy($output, $output.sprintf('.%d.backup', \time()));
 
